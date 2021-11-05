@@ -11,8 +11,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
 app.get('/users', (req, res) => {
-  console.log(readUsers());
-  res.send(200);
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(readUsers());
 });
 
 app.post('/user/new', (req, res) => {
@@ -43,23 +43,29 @@ app.listen(PORT, (error) => {
 function readUsers() {
   db.query("SELECT * FROM users", function(err, results) {
     if (err) { 
-      console.log(err) };
-    return results;
+      console.log(err)
+    };
+    let usersArray = [];
+    results.forEach(element => {
+      usersArray.push({ firstName: element.firstName, lastName: element.lastName, id:element.id});
+    });
+    console.log(JSON.stringify(usersArray))
+    return JSON.stringify(usersArray);
 });
 }
 
 function writeUser(user) {
-  db.query('insert into users values (' + user.id + ',"' + user.firstName + '","' + user.lastName + '");');
+  db.query('insert into users values (' + db.escape(user.id) + ',' + db.escape(user.firstName) + ',' + db.escape(user.lastName) + ');');
   return "user successfully created"
 }
 
 function editUser(id, user) {
-  db.query('UPDATE users SET firstName="' + user.firstName + '", lastName="' + user.lastName + '" where id=' + id)
+  db.query('UPDATE users SET firstName=' + db.escape(user.firstName) + ', lastName=' + db.escape(user.lastName) + ' where id=' + db.escape(id))
     return "user successfully edited"
 }
 
 function deleteUser(userId) {
-  db.query('DELETE FROM users where id=' + userId), function (err) {
+  db.query('DELETE FROM users where id=' + db.escape(userId)), function (err) {
   if(err) console.log(err);
   }
     return "user successfully deleted"
