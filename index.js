@@ -3,7 +3,6 @@ const PORT = process.env.PORT || 3000;
 const fs = require("fs");
 const db = require("./models/db");
 const express = require('express');
-const jsonOffset = 4;
 const app = express();
 
 
